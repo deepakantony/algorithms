@@ -6,8 +6,6 @@
 # A subsequence is not necessarily continuos.
 #
 
-
-
 def memoizeLCS(seq1, seq2, i, j, LCS):
     if i <= 0 or j <= 0: return 0
     i1 = i-1
@@ -22,23 +20,15 @@ def memoizeLCS(seq1, seq2, i, j, LCS):
                        memoizeLCS(seq1, seq2, i, j1, LCS) )
     return LCS[i1][j1]
 
-def reconstructLCS(seq1, seq2, LCS):
-    seq = []
-    seq1Index = 0
-    seq1Len = len(seq1)
-    seq2Index = 0
-    seq2Len = len(seq2)
-    while seq1Index < seq1Len and seq2Index < seq2Len:
-        if seq1[seq1Index] == seq2[seq2Index]:
-            seq.append(seq1[seq1Index])
-            seq1Index += 1
-            seq2Index += 1
-        elif (seq1Index + 1) < seq1Len and (seq2Index + 1) < seq2Len and \
-                LCS[seq1Index+1][seq2Index] >= LCS[seq1Index][seq2Index+1]:
-            seq1Index += 1
-        else: seq2Index += 1
-
-    return "".join(seq) if type(seq1) is str else seq
+def backtrackLCS(seq1, seq2, i, j, LCS, final):
+    if i <= 0 or j <= 0: return
+    if seq1[i-1] == seq2[j-1]:
+        backtrackLCS(seq1, seq2, i-1, j-1, LCS, final)
+        final.append(seq1[i-1])
+    elif i > 1 and j > 1 and LCS[i-2][j-1] >= LCS[i-1][j-2]:
+        backtrackLCS(seq1, seq2, i-1, j, LCS, final)
+    else:
+        backtrackLCS(seq1, seq2, i, j-1, LCS, final)
 
 # Lets first identify the optimal substructure for this problem.
 # Let X and Y be two sequences. Let, Xi be a subsequence of X such that 
@@ -55,8 +45,10 @@ def longestCommonSubsequence(seq1, seq2):
         LCS.append([])
         for j in xrange(len(seq2)):
             LCS[i].append(-1)
-    print memoizeLCS(seq1, seq2, len(seq1), len(seq2), LCS)
-    commonSeq = reconstructLCS(seq1, seq2, LCS)
+    memoizeLCS(seq1, seq2, len(seq1), len(seq2), LCS)
+    commonSeq = []
+    backtrackLCS(seq1, seq2, len(seq1), len(seq2), LCS, commonSeq)
+    commonSeq = "".join(commonSeq) if type(seq1) is str else commonSeq
     return (len(commonSeq), commonSeq)
 
 def unittest(seq1, seq2, sol):
@@ -70,13 +62,13 @@ def unittest(seq1, seq2, sol):
     if actualSol == sol:
         print "OK"
     else:
-        print "FAILED - Actual Output: " + str(actualSol)
+        print "***** FAILED - Actual Output: " + str(actualSol)
 
 
 def main():
     unittest('kannada', 'canada', (5,'anada'))
     unittest('empty bottle', 'nematode knowledge', (7,'emt ole'))
-    unittest([1,2,3], [1,3,2,4], (2,[1,3]))
+    unittest([1,2,3], [1,3,2,4], (2,[1,2]))
     unittest([1,2,3], [4,5,6,7,8,9,10], (0,[]))
     unittest('', '', None)
     unittest('', 'abcd', None)
