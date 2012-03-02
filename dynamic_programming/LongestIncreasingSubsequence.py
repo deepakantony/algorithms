@@ -44,6 +44,7 @@ def longestIncreasingSubsequence(seq):
     
     if __debug__: print str(LIS) + "  " + str(maxLIS)
     if __debug__: print str(prev) + "  " + str(maxIndex)
+
     liSeq = [] # The sequence itself
     while prev[maxIndex] != -1:
         liSeq.append(seq[maxIndex])
